@@ -1,0 +1,705 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "43cda138",
+   "metadata": {},
+   "source": [
+    "# NLP Unit 2 — Complete Notebook (Ready-to-run)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "0c38033d",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Install commands executed. If any package failed, re-run this cell.\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "[notice] A new release of pip is available: 24.3.1 -> 25.3\n",
+      "[notice] To update, run: python.exe -m pip install --upgrade pip\n"
+     ]
+    }
+   ],
+   "source": [
+    "# INSTALL required packages (runs inside the notebook)\n",
+    "# This cell will install packages into the environment Jupyter is using.\n",
+    "import sys\n",
+    "!{sys.executable} -m pip install --quiet nltk scikit-learn gensim matplotlib pandas requests tqdm\n",
+    "print(\"Install commands executed. If any package failed, re-run this cell.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "19dec52e",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "NLTK resources downloaded.\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "[nltk_data] Downloading package punkt to\n",
+      "[nltk_data]     C:\\Users\\rcvik\\AppData\\Roaming\\nltk_data...\n",
+      "[nltk_data]   Package punkt is already up-to-date!\n",
+      "[nltk_data] Downloading package stopwords to\n",
+      "[nltk_data]     C:\\Users\\rcvik\\AppData\\Roaming\\nltk_data...\n",
+      "[nltk_data]   Package stopwords is already up-to-date!\n"
+     ]
+    }
+   ],
+   "source": [
+    "# NLTK setup\n",
+    "import nltk\n",
+    "nltk.download('punkt')\n",
+    "nltk.download('stopwords')\n",
+    "print(\"NLTK resources downloaded.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "4daa3118-9ea9-4af4-a278-b59ddb7a9ea8",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "[nltk_data] Downloading package punkt_tab to\n",
+      "[nltk_data]     C:\\Users\\rcvik\\AppData\\Roaming\\nltk_data...\n",
+      "[nltk_data]   Unzipping tokenizers\\punkt_tab.zip.\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "True"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import nltk\n",
+    "nltk.download('punkt_tab')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "806028be-a248-4f24-a970-30ff7979d76c",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>text</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>Government announces new education policy to i...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>Sports: local team wins the national champions...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>Economy grows steadily as exports increase thi...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>Technology companies release latest smartphone...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>Health officials warn about seasonal flu and u...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                                                text\n",
+       "0  Government announces new education policy to i...\n",
+       "1  Sports: local team wins the national champions...\n",
+       "2  Economy grows steadily as exports increase thi...\n",
+       "3  Technology companies release latest smartphone...\n",
+       "4  Health officials warn about seasonal flu and u..."
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.head()\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ce101848",
+   "metadata": {},
+   "source": [
+    "## 1) Sample dataset (small)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "9b40c88f",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>text</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>Government announces new education policy to i...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>Sports: local team wins the national champions...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>Economy grows steadily as exports increase thi...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>Technology companies release latest smartphone...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>Health officials warn about seasonal flu and u...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                                                text\n",
+       "0  Government announces new education policy to i...\n",
+       "1  Sports: local team wins the national champions...\n",
+       "2  Economy grows steadily as exports increase thi...\n",
+       "3  Technology companies release latest smartphone...\n",
+       "4  Health officials warn about seasonal flu and u..."
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Small dataset (you can replace with your data)\n",
+    "docs = [\n",
+    "\"Government announces new education policy to improve schools\",\n",
+    "\"Sports: local team wins the national championship in a thrilling final\",\n",
+    "\"Economy grows steadily as exports increase this quarter\",\n",
+    "\"Technology companies release latest smartphones with better cameras\",\n",
+    "\"Health officials warn about seasonal flu and urge vaccinations\",\n",
+    "\"Environment: city plants 10,000 trees to fight air pollution\",\n",
+    "\"Entertainment: blockbuster movie breaks box office records\",\n",
+    "\"Education experts discuss reforms in higher education curriculum\",\n",
+    "\"Researchers discover a new method to reduce carbon emissions\",\n",
+    "\"Local startup raises funds to expand renewable energy business\"\n",
+    "]\n",
+    "import pandas as pd\n",
+    "df = pd.DataFrame({'text': docs})\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3a7f97da",
+   "metadata": {},
+   "source": [
+    "## 2) Cleaning & Tokenization"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "0e63b7f4",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>text</th>\n",
+       "      <th>clean</th>\n",
+       "      <th>tokens</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>Government announces new education policy to i...</td>\n",
+       "      <td>government announces new education policy impr...</td>\n",
+       "      <td>[government, announces, new, education, policy...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>Sports: local team wins the national champions...</td>\n",
+       "      <td>sports local team wins national championship t...</td>\n",
+       "      <td>[sports, local, team, wins, national, champion...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>Economy grows steadily as exports increase thi...</td>\n",
+       "      <td>economy grows steadily exports increase quarter</td>\n",
+       "      <td>[economy, grows, steadily, exports, increase, ...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>Technology companies release latest smartphone...</td>\n",
+       "      <td>technology companies release latest smartphone...</td>\n",
+       "      <td>[technology, companies, release, latest, smart...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>Health officials warn about seasonal flu and u...</td>\n",
+       "      <td>health officials warn seasonal flu urge vaccin...</td>\n",
+       "      <td>[health, officials, warn, seasonal, flu, urge,...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                                                text  \\\n",
+       "0  Government announces new education policy to i...   \n",
+       "1  Sports: local team wins the national champions...   \n",
+       "2  Economy grows steadily as exports increase thi...   \n",
+       "3  Technology companies release latest smartphone...   \n",
+       "4  Health officials warn about seasonal flu and u...   \n",
+       "\n",
+       "                                               clean  \\\n",
+       "0  government announces new education policy impr...   \n",
+       "1  sports local team wins national championship t...   \n",
+       "2    economy grows steadily exports increase quarter   \n",
+       "3  technology companies release latest smartphone...   \n",
+       "4  health officials warn seasonal flu urge vaccin...   \n",
+       "\n",
+       "                                              tokens  \n",
+       "0  [government, announces, new, education, policy...  \n",
+       "1  [sports, local, team, wins, national, champion...  \n",
+       "2  [economy, grows, steadily, exports, increase, ...  \n",
+       "3  [technology, companies, release, latest, smart...  \n",
+       "4  [health, officials, warn, seasonal, flu, urge,...  "
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import re, string\n",
+    "from nltk.corpus import stopwords\n",
+    "from nltk.tokenize import word_tokenize\n",
+    "\n",
+    "stop_words = set(stopwords.words('english'))\n",
+    "\n",
+    "def clean_text(text):\n",
+    "    text = text.lower()\n",
+    "    text = re.sub(r'\\s+', ' ', text)\n",
+    "    text = re.sub(r'[^a-z0-9\\s]', '', text)\n",
+    "    tokens = [w for w in word_tokenize(text) if w not in stop_words]\n",
+    "    return ' '.join(tokens), tokens\n",
+    "\n",
+    "df['clean'], df['tokens'] = zip(*df['text'].apply(clean_text))\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fef3097f",
+   "metadata": {},
+   "source": [
+    "## 3) Count Vectorizer, TF-IDF, N-grams"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "86313223",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "CountVectorizer shape: (10, 68)\n",
+      "TF-IDF shape: (10, 68)\n",
+      "With bi-grams shape: (10, 130)\n",
+      "\n",
+      "Sample features (first 20): ['10000' 'air' 'announces' 'better' 'blockbuster' 'box' 'breaks'\n",
+      " 'business' 'cameras' 'carbon' 'championship' 'city' 'companies'\n",
+      " 'curriculum' 'discover' 'discuss' 'economy' 'education' 'emissions'\n",
+      " 'energy']\n"
+     ]
+    }
+   ],
+   "source": [
+    "from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer\n",
+    "\n",
+    "# Count Vectorizer\n",
+    "cv = CountVectorizer()\n",
+    "X_cv = cv.fit_transform(df['clean'])\n",
+    "print(\"CountVectorizer shape:\", X_cv.shape)\n",
+    "\n",
+    "# TF-IDF\n",
+    "tfidf = TfidfVectorizer()\n",
+    "X_tf = tfidf.fit_transform(df['clean'])\n",
+    "print(\"TF-IDF shape:\", X_tf.shape)\n",
+    "\n",
+    "# N-grams (1,2)\n",
+    "cv_ng = CountVectorizer(ngram_range=(1,2), min_df=1)\n",
+    "X_ng = cv_ng.fit_transform(df['clean'])\n",
+    "print(\"With bi-grams shape:\", X_ng.shape)\n",
+    "\n",
+    "# Show sample features\n",
+    "print(\"\\nSample features (first 20):\", cv.get_feature_names_out()[:20])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "64db93af",
+   "metadata": {},
+   "source": [
+    "## 4) Train small Word2Vec (demo)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "fc0b1d22",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Trained Word2Vec on small corpus. Vocab size: 68\n",
+      "Top similar to education: [('government', 0.4143822193145752), ('urge', 0.34158065915107727), ('national', 0.2501566708087921), ('city', 0.2418750524520874), ('companies', 0.23779667913913727)]\n",
+      "Top similar to technology: [('health', 0.2729586660861969), ('grows', 0.26984816789627075), ('box', 0.23557914793491364), ('seasonal', 0.2289569228887558), ('researchers', 0.22848105430603027)]\n",
+      "Top similar to energy: [('movie', 0.2762676477432251), ('curriculum', 0.2741406261920929), ('box', 0.21177679300308228), ('thrilling', 0.20857055485248566), ('increase', 0.20815494656562805)]\n",
+      "Top similar to health: [('increase', 0.3330708146095276), ('warn', 0.28281116485595703), ('seasonal', 0.2807413339614868), ('technology', 0.2729586660861969), ('local', 0.2531234920024872)]\n",
+      "Top similar to team: [('new', 0.3971807658672333), ('higher', 0.3221035897731781), ('vaccinations', 0.2398131936788559), ('announces', 0.22932805120944977), ('renewable', 0.22028471529483795)]\n"
+     ]
+    }
+   ],
+   "source": [
+    "from gensim.models import Word2Vec\n",
+    "\n",
+    "sentences = df['tokens'].tolist()\n",
+    "w2v = Word2Vec(sentences, vector_size=50, window=3, min_count=1, workers=2, epochs=100, seed=42)\n",
+    "print(\"Trained Word2Vec on small corpus. Vocab size:\", len(w2v.wv.index_to_key))\n",
+    "\n",
+    "# example similarity\n",
+    "for w in ['education','technology','energy','health','team']:\n",
+    "    if w in w2v.wv:\n",
+    "        print(f\"Top similar to {w}:\", w2v.wv.most_similar(w, topn=5))\n",
+    "    else:\n",
+    "        print(f\"{w} not in vocab (trained).\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "56098fcd",
+   "metadata": {},
+   "source": [
+    "## 5) Pre-trained GloVe (download, convert, load)\n",
+    "\n",
+    "This cell downloads GloVe (100d), converts to word2vec format, and loads KeyedVectors. It will take some time and requires internet access when you run the notebook locally."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a44f42a8",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Downloading GloVe (this may be large, ~822MB). If you want smaller, edit the notebook to use 50d.\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Downloading GloVe:   2%|█                                                          | 15.3M/862M [00:10<06:45, 2.09MB/s]"
+     ]
+    }
+   ],
+   "source": [
+    "# Download and load pre-trained GloVe embeddings (100d) if not present.\n",
+    "# NOTE: This downloads a ~822MB zip (glove.6B.zip is ~822MB). If you prefer smaller, change to 50d or 100d accordingly.\n",
+    "import os\n",
+    "import requests, zipfile, io\n",
+    "from tqdm import tqdm\n",
+    "\n",
+    "glove_dir = \"glove\"\n",
+    "os.makedirs(glove_dir, exist_ok=True)\n",
+    "glove_zip_path = os.path.join(glove_dir, \"glove.6B.zip\")\n",
+    "glove_txt_100d = os.path.join(glove_dir, \"glove.6B.100d.txt\")\n",
+    "word2vec_output = os.path.join(glove_dir, \"glove.6B.100d.word2vec.txt\")\n",
+    "\n",
+    "# If glove text not already present, download and extract\n",
+    "if not os.path.isfile(glove_txt_100d):\n",
+    "    print(\"Downloading GloVe (this may be large, ~822MB). If you want smaller, edit the notebook to use 50d.\")\n",
+    "    url = \"http://nlp.stanford.edu/data/glove.6B.zip\"\n",
+    "    # stream download with progress\n",
+    "    r = requests.get(url, stream=True)\n",
+    "    total = int(r.headers.get('content-length', 0))\n",
+    "    with open(glove_zip_path, 'wb') as f, tqdm(total=total, unit='B', unit_scale=True, desc='Downloading GloVe') as pbar:\n",
+    "        for chunk in r.iter_content(chunk_size=1024):\n",
+    "            if chunk:\n",
+    "                f.write(chunk)\n",
+    "                pbar.update(len(chunk))\n",
+    "    print(\"Extracting...\")\n",
+    "    with zipfile.ZipFile(glove_zip_path, 'r') as z:\n",
+    "        z.extractall(glove_dir)\n",
+    "    print(\"GloVe extracted.\")\n",
+    "\n",
+    "# Convert to word2vec format (if needed) and load using gensim\n",
+    "from gensim.scripts.glove2word2vec import glove2word2vec\n",
+    "from gensim.models import KeyedVectors\n",
+    "\n",
+    "if not os.path.isfile(word2vec_output):\n",
+    "    print(\"Converting GloVe to word2vec format...\")\n",
+    "    glove2word2vec(glove_txt_100d, word2vec_output)\n",
+    "    print(\"Conversion done.\")\n",
+    "\n",
+    "print(\"Loading embeddings (this may take time)...\")\n",
+    "glove_kv = KeyedVectors.load_word2vec_format(word2vec_output, binary=False)\n",
+    "print(\"Loaded GloVe vectors. Vocab size:\", len(glove_kv.index_to_key))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "42cc3e6b",
+   "metadata": {},
+   "source": [
+    "## 6) Use pre-trained embeddings: similarity and examples"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "65288884",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Check similarities using loaded GloVe (if loaded)\n",
+    "try:\n",
+    "    model = glove_kv\n",
+    "    words = ['king','queen','man','woman','apple','banana','education','technology','energy','health']\n",
+    "    for w in words:\n",
+    "        if w in model:\n",
+    "            print(\"\\nTop similar to\", w, \"->\", model.most_similar(w, topn=5))\n",
+    "        else:\n",
+    "            print(\"\\nWord not in GloVe vocab:\", w)\n",
+    "except NameError:\n",
+    "    print(\"GloVe model not loaded. Run the previous cell (download+load).\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "df839564",
+   "metadata": {},
+   "source": [
+    "## 7) Visualize embeddings (selected words)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "69bb7f2d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "from sklearn.decomposition import PCA\n",
+    "from sklearn.manifold import TSNE\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "# Choose a set of words to visualize (only those present in model)\n",
+    "def visualize_words(model, words_to_plot, method='pca', perplexity=30):\n",
+    "    words = [w for w in words_to_plot if w in model]\n",
+    "    vecs = np.array([model[w] for w in words])\n",
+    "    if method=='pca':\n",
+    "        reducer = PCA(n_components=2, random_state=42)\n",
+    "    else:\n",
+    "        reducer = TSNE(n_components=2, random_state=42, init='pca', perplexity=perplexity)\n",
+    "    coords = reducer.fit_transform(vecs)\n",
+    "    plt.figure(figsize=(8,6))\n",
+    "    plt.scatter(coords[:,0], coords[:,1])\n",
+    "    for i,w in enumerate(words):\n",
+    "        plt.text(coords[i,0]+0.02, coords[i,1]+0.02, w)\n",
+    "    plt.title(f\"{method.upper()} projection of selected embeddings\")\n",
+    "    plt.show()\n",
+    "\n",
+    "# Example list\n",
+    "words_to_plot = ['king','queen','man','woman','prince','princess','apple','banana','orange','education','school','student','technology','computer','phone','energy','renewable','solar','wind','health','hospital']\n",
+    "try:\n",
+    "    visualize_words(glove_kv, words_to_plot, method='pca')\n",
+    "    visualize_words(glove_kv, words_to_plot, method='tsne')\n",
+    "except NameError:\n",
+    "    print(\"Pre-trained embeddings not found. Run download cell.\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ec3d2303",
+   "metadata": {},
+   "source": [
+    "## 8) Save cleaned dataset and vectors (optional)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e2b0ea74-206f-4ce3-84b3-855796d2ddb6",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "44de034d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Save cleaned data and small trained w2v model\n",
+    "df.to_csv(\"cleaned_texts.csv\", index=False)\n",
+    "w2v.save(\"small_word2vec.model\")\n",
+    "print(\"Saved cleaned_texts.csv and small_word2vec.model in current folder.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8bca8170-ff12-43f6-84a8-9113cebb0408",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1fffa569-f94e-40bb-bf8b-1a257b12daf9",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.13.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
